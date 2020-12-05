@@ -44,19 +44,30 @@ class GridPoint {
 
     // Match both first and last names in case
     // of collisions.
-//    bool operator==(const GridPoint& p) const
-//    {
-//        return xval == p.xval && yval == p.yval;
-//    }
+    bool operator==(const GridPoint& p) const
+    {
+        return xval == p.xval && yval == p.yval;
+    }
 };
+
+
 class MyHashFunction {
 public:
+    unsigned long long first, second;
     template <class T1, class T2>
-    size_t operator()(const GridPoint &p) const
+
+    size_t operator()(const pair<T1, T2>& p) const
     {
-        // fails if yvals are equal?
-        return p.xval;
+        auto hash1 = hash<T1>{}(p.first);
+        auto hash2 = hash<T2>{}(p.second);
+//        return hash1 ^ hash2;
+          return hash1 + hash2 ;
     }
+//    template <class T3, class T4>
+//    bool operator==(const pair<T3, T4>& p) const
+//    {
+//        return first == p.first && second == p.second;
+//    }
 };
 
 
@@ -105,7 +116,7 @@ list<Point> total;
 void part4();
 
 //map<Point,Point> umap;
-std::unordered_map<GridPoint, Point, MyHashFunction> umap;
+std::unordered_map<pair<unsigned long long, unsigned long long>, Point, MyHashFunction> umap;
 void randomize();
 
 
@@ -119,7 +130,7 @@ int main() {
     srand( time(NULL) );
 
 
-    //    part1();
+//    part1();
 //
 //    cout << "Points with Brute Force Approach: " << fixed<< setprecision(23)<< "(" <<finalPoints1[0].xval << " , " << finalPoints1[0].yval << ") , ("<< finalPoints1[1].xval << " , " << finalPoints1[1].yval << ")"
 //         <<"\n"<<"Minimum Distance with Brute Force Approach: " << part1distance << "\n";
@@ -127,20 +138,20 @@ int main() {
 //    cout << "Time taken by Part 1: "
 //         << timePart1 << " microseconds" << endl << "\n";
 
-    part2();
-    cout << "N is: " << n << "\n";
+  //  part2();
+//    cout << "N is: " << n << "\n";
 
-    cout << "Points with Recursive Approach: " << fixed<< setprecision(23)<< "(" <<finalPoints2[0].xval << " , " << finalPoints2[0].yval << ") , ("<< finalPoints2[1].xval << " , " << finalPoints2[1].yval << ")"
-         <<"\n"<<"Minimum Distance with Recursive Approach: " << part2distance << "\n";
-
-    cout << "Time taken by Part 2: "
-         << timePart2 << " microseconds" << endl << "\n";
-
-    output << "Points with Recursive Approach: " << fixed<< setprecision(23)<< "(" <<finalPoints2[0].xval << " , " << finalPoints2[0].yval << ") , ("<< finalPoints2[1].xval << " , " << finalPoints2[1].yval << ")"
-           <<"\n"<<"Minimum Distance with Recursive Approach: " << part2distance << "\n";
-
-    output << "Time taken by Part 2: "
-           << timePart2 << " microseconds" << endl << "\n";
+//    cout << "Points with Recursive Approach: " << fixed<< setprecision(23)<< "(" <<finalPoints2[0].xval << " , " << finalPoints2[0].yval << ") , ("<< finalPoints2[1].xval << " , " << finalPoints2[1].yval << ")"
+//         <<"\n"<<"Minimum Distance with Recursive Approach: " << part2distance << "\n";
+//
+//    cout << "Time taken by Part 2: "
+//         << timePart2 << " microseconds" << endl << "\n";
+//
+//    output << "Points with Recursive Approach: " << fixed<< setprecision(23)<< "(" <<finalPoints2[0].xval << " , " << finalPoints2[0].yval << ") , ("<< finalPoints2[1].xval << " , " << finalPoints2[1].yval << ")"
+//           <<"\n"<<"Minimum Distance with Recursive Approach: " << part2distance << "\n";
+//
+//    output << "Time taken by Part 2: "
+//           << timePart2 << " microseconds" << endl << "\n";
     part3();
 
 
@@ -175,6 +186,8 @@ int main() {
     cout << "Time taken by Part 4: "
            << timePart4 << " microseconds" << endl;
 
+    cout << (part4distance == part3distance) << endl;
+
     output.close();
     return 0;
 }
@@ -187,98 +200,138 @@ void part4() {
 //    }
     auto start = high_resolution_clock::now();
     randomize();
-
+    bool firstTime = false;
     double theta = dist(coordspart4[0], coordspart4[1]);
 
-    cout << "theta: " << theta << endl;
+   // cout << "theta: " << theta << endl;
     double d = theta/2;
-    cout << "d: " << d << endl;
+  //  cout << "d: " << d << endl;
     //change how finding grid points
-    int x = coordspart4[0].xval/d;
-    int y = coordspart4[0].yval/d;
-    cout << coordspart4[0].xval << "  " << coordspart4[0].yval << endl;
+    unsigned long long x = coordspart4[0].xval/d;
+    unsigned long long y = coordspart4[0].yval/d;
+  //  cout << coordspart4[0].xval << "  " << coordspart4[0].yval << endl;
 
-    cout << x << "  " << y << endl;
-    GridPoint p(x, y);
+  //  cout << x << "  " << y << endl;
+    //GridPoint p(x, y);
+    pair<unsigned long long, unsigned long long> p(x,y);
     umap[p] = coordspart4[0];
 
     x = coordspart4[1].xval/d;
     y = coordspart4[1].yval/d;
-    GridPoint p2(x, y);
 
+    finalPoints4[0] = coordspart4[0];
+    finalPoints4[1] = coordspart4[1];
+    //GridPoint p2(x, y);
+    pair<unsigned long long, unsigned long long> p2(x,y);
     umap[p2] = coordspart4[1];
 
-
+    bool foundSmaller = false;
 
     for(int i = 2; i < (int)coordspart4.size(); i++)
     {
 
-        cout << "D: " << d << endl;
+//        cout << "D: " << d << endl;
 
         //change how finding grid points
-        int x = coordspart4[i].xval/d;
-        int y = coordspart4[i].yval/d;
+        unsigned long long h = coordspart4[i].xval/d;
+        unsigned long long j = coordspart4[i].yval/d;
 
-        cout << "X: " << x << "Y: " << y << "\n";
+//        cout << "X: " << h << "Y: " << j << "\n";
+//        cout << "Xact: " << coordspart4[i].xval << "Yact: " << coordspart4[i].yval << "\n";
+        //GridPoint gen(x,y);
+        pair<unsigned long long, unsigned long long> gen(h,j);
+        unsigned long long leftSide = h-2;
+        unsigned long long rightSide = h+2;
+        unsigned long long topSide = j+2;
+        unsigned long long bottomSide = j-2;
 
-        GridPoint gen(x,y);
-        int leftSide = x-2;
-        int rightSide = x+2;
-        int topSide = y+2;
-        int bottomSide = y-2;
+        if(leftSide < 0)
+        {
+            leftSide = 0;
+        }
+        if(bottomSide < 0)
+        {
+            bottomSide = 0;
+        }
+
+        if(rightSide > (unsigned long long)(1/d))
+        {
+            rightSide = (unsigned long long)(1/d);
+        }
+        if(topSide > (unsigned long long)(1/d))
+        {
+            topSide = (unsigned long long)(1/d);
+        }
             // add if any are negative make 0
             // if any are greater than 1/d than make 1/d
-        for(int a = leftSide; a < rightSide; a++ ) {
-            for(int b = bottomSide; b < topSide; b++)
+        for(unsigned long long a = leftSide; a <= rightSide; a++ ) {
+            for(unsigned long long b = bottomSide; b <= topSide; b++)
             {
-                GridPoint check(a, b);
 
-                if(umap.find(check) != umap.end() && (umap.find(check) != umap.find(gen)))
+                pair<unsigned long long, unsigned long long> check(a,b);
+                if(a == rightSide)
                 {
-                    cout << "Here bud!" << endl;
-                    cout << check.xval << "  " << check.yval << endl;
+                    umap[gen] = coordspart4[i];
+                }
+                if(umap.find(check) != umap.end()) //!(check.first == gen.first && check.second == gen.second))
+                {
 
-                    if(dist(umap.at(check), coordspart4[i]) < theta)
-                    {
-                        theta = dist(umap.at(check), coordspart4[i]);
-                        d = theta/2;
-                        cout << "distance less"<< "  " << d <<   endl;
+                    if(((umap.at(check).xval != coordspart4[i].xval || umap.at(check).yval != coordspart4[i].yval))) {
+//                        cout << "Here bud!" << endl;
+//                        cout << check.first << "  " << check.second << endl;
 
-                        cout << coordspart4[i].xval << "  " << coordspart4[i].yval << endl;
-                        cout << umap.at(check).xval << "  " << umap.at(check).yval << endl;
-                        umap.clear();
+                        if (dist(umap.at(check), coordspart4[i]) <= theta) {
+                            theta = dist(umap.at(check), coordspart4[i]);
+                            d = theta / 2;
+                            foundSmaller = true;
+                            finalPoints4[0] = umap.at(check);
+                            finalPoints4[1] = coordspart4[i];
 
-                        cout << "i: " << i << endl;
-                        for(int n = 0; n<= i; n++)
-                        {
-                            int c = coordspart4[n].xval/d;
-                            int e = coordspart4[n].yval/d;
-                            cout << coordspart4[n].xval << "  " << coordspart4[n].yval << endl;
+//                            cout << "distance less" << "  " << d << endl;
+//
+//                            cout << coordspart4[i].xval << "  " << coordspart4[i].yval << endl;
+//                            cout << umap.at(check).xval << "  " << umap.at(check).yval << endl;
 
-                            cout << c << "  " << e << endl;
-                            GridPoint p(c, e);
-                            umap[p] = coordspart4[n];
                         }
-                        cout << "Size: " << umap.size() << endl;
+
+
+                           // umap[gen] = coordspart4[i];
                     }
 
-                    else
-                    {
-                        umap[gen] = coordspart4[i];
-                        cout << "point added" << endl;
-                    }
 
                 }
 
+                firstTime = true;
+
             }
+
+
+        }
+        if(foundSmaller == true) {
+            foundSmaller = false;
+            //cout << "i: " << i << endl;
+            umap.clear();
+  //          cout << "CLEARED" << endl;
+            for (int n = 0; n <= i; n++) {
+                unsigned long long c = coordspart4[n].xval / d;
+                unsigned long long e = coordspart4[n].yval / d;
+//                cout << coordspart4[n].xval << "  " << coordspart4[n].yval << endl;
+//                cout << c << "  " << e << endl;
+                //GridPoint p(c, e);
+                pair<unsigned long long, unsigned long long> p3(c, e);
+                umap[p3] = coordspart4[n];
+            }
+          //  cout << "Size: " << umap.size() << endl;
+
 
         }
 
 
     }
 
-    cout << "distance: " << theta << endl;
+   // cout << "distance: " << theta << endl;
 
+    part4distance = theta;
     auto stop = high_resolution_clock::now();
 
     auto duration = duration_cast<microseconds>(stop - start);
@@ -288,7 +341,7 @@ void part4() {
 
 //    for(Point p: coordspart4)
 //    {
-//        cout << "AfterRanX: " << p.xval << "  AfterRanY: " << p.yval << "\n";
+//        cout << p.xval<< "  "<< p.yval << "\n";
 //    }
 
 }
@@ -416,7 +469,7 @@ void generatePoints() {
     std::ofstream myfile;
     myfile.open ("points.txt");
 
-    for(int i = 0; i < n; i++)
+    for(int i = 0; i < 500; i++)
     {
         Point generate;
         generate.xval =  ((double) rand() / (RAND_MAX));
@@ -635,9 +688,8 @@ double bruteforce(list<Point> list, int n) {
 }
 
 double dist(Point p1, Point p2) {
-    return sqrt( (p1.xval - p2.xval)*(p1.xval - p2.xval) +
-                 (p1.yval - p2.yval)*(p1.yval - p2.yval)
-    );
+    return sqrt( pow((p1.xval - p2.xval), 2) +
+                         pow((p1.yval - p2.yval), 2));
 }
 
 
